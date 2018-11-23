@@ -1,77 +1,87 @@
-var camera, scene, renderer, particles, particle, material, particleCount, points, texture;
-var xSpeed, ySpeed;
-xSpeed = 0.0005;
-ySpeed = 0.001;
-var winWidth, winHeight;
-winWidth = window.innerWidth;
-winHeight = window.innerHeight;
+var w = c.width = window.innerWidth,
+		h = c.height = window.innerHeight,
+		ctx = c.getContext( '2d' ),
 
-init();
-animate();
+		opts = {
 
-function init(){
-  scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2('#222', 0.001);
+			count: w/10,
+			baseSize: 1,
+			addedSize: 2,
+			velX: 1,
+			velY: 4,
+			framesBack: 8,
+			framesFront: 4
+		},
 
-  camera = new THREE.PerspectiveCamera(75, winWidth/winHeight, 1, 1000);
-  camera.position.z = 500;
+		drops = [];
 
-  // particle
-  // transparentとblendingたぶん効いてない
-  material = new THREE.PointsMaterial({
-    color: 0xffffff,
-    size: 3,
-    transparent: true,
-    blending: THREE.AdditiveBlending
-  });
+function anim(){
 
-  particleCount = 15000;
-  particles = new THREE.Geometry();
+	window.requestAnimationFrame( anim );
 
-  for (var i = 0; i < particleCount; i++) {
-    var px = Math.random() * 2000 - 1000;
-    var py = Math.random() * 2000 - 1000;
-    var pz = Math.random() * 2000 - 1000;
-    particle = new THREE.Vector3(px, py, pz);
-    particle.velocity = new THREE.Vector3(0, Math.random(), 0);
-    particles.vertices.push(particle);
-  }
+	ctx.fillStyle = '#222';
+	ctx.fillRect( 0, 0, w, h );
+	ctx.strokeStyle = '#eee';
 
-  points = new THREE.Points(particles, material);
-  points.sortParticles = true;
-  scene.add(points);
+	if( drops.length < opts.count )
+		drops.push( new Drop );
 
-  renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(winWidth, winHeight);
-  renderer.setClearColor('#222', 1);
-  document.getElementById('canvas').appendChild(renderer.domElement);
+	drops.map( function( drop ){ drop.step(); } );
 }
+function Drop(){
 
-function animate(){
-  requestAnimationFrame(animate);
+	this.x = ( Math.random() * w ) | 0;
+	this.y = 0;
 
-  scene.rotation.y += xSpeed;
+	this.size = opts.baseSize + opts.addedSize * Math.random();
 
-  // パーティクル上下移動
-  var i = particleCount;
-  while(i--){
-    var particle = particles.vertices[i];
-
-    // y
-    if(particle.y > 1000){
-      particle.y = -1000;
-      particle.velocity.y = Math.random();
-    }
-    particle.velocity.y += Math.random() * ySpeed;
-
-    particle.add(particle.velocity);
-  }
-  points.geometry.verticesNeedUpdate = true;
-
-  render();
+	this.vx = opts.velX * this.size;
+	this.vy = opts.velY * this.size;
 }
+Drop.prototype.step = function(){
 
-function render(){
-  camera.lookAt(scene.position);
-  renderer.render(scene, camera);
+	this.x += this.vx
+	this.y += this.vy;
+
+	if( this.x - opts.framesBack * this.vy > w )
+		this.x = -opts.framesFront * this.vy;
+
+	if( this.y - opts.framesBack * this.vy > h )
+		this.y = -opts.framesFront * this.vy;
+
+	var x = this.x - opts.framesBack * this.vx,
+			y = this.y - opts.framesBack * this.vy;
+
+	for( var i = 1; i < opts.framesBack; ++i ){
+
+		ctx.lineWidth = i / opts.framesBack * this.size;
+
+		ctx.beginPath();
+		ctx.moveTo( x, y );
+
+		x += this.vx;
+		y += this.vy;
+
+		ctx.lineTo( x, y );
+		ctx.stroke();
+	}
+	for( var i = 0; i < opts.framesFront; ++i ){
+
+		ctx.lineWidth = this.size - i / opts.framesFront * this.size;
+
+		ctx.beginPath();
+		ctx.moveTo( x, y );
+
+		x += this.vx;
+		y += this.vy;
+
+		ctx.lineTo( x, y );
+		ctx.stroke();
+	}
 }
+anim();
+window.addEventListener( 'resize', function(){
+
+	w = c.width = window.innerWidth;
+	h = c.height = window.innerHeight;
+})
