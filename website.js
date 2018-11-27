@@ -19,7 +19,7 @@ function anim(){
 
 	window.requestAnimationFrame( anim );
 
-	ctx.fillStyle = '#222';
+	ctx.fillStyle = '#05132d';
 	ctx.fillRect( 0, 0, w, h );
 	ctx.strokeStyle = '#eee';
 
