@@ -1,3 +1,0 @@
-# MY WEBSITE!
-
-By Nourin 
