@@ -236,6 +236,7 @@ textarea {
   font-size: inherit;
   line-height: inherit;
 }
+
 button,
 input {
   overflow: visible;
@@ -8797,6 +8798,7 @@ section h2 {
   padding-bottom: 1rem;
   font-weight: 700;
   font-family: Montserrat;
+  background-color: #000;
 }
 #mainNav .navbar-brand {
   color: rgb(255, 255, 255);
@@ -9053,3 +9055,4 @@ a:hover {
   background-color: rgb(148, 50, 50);
   border-color: rgb(148, 50, 50);
 }
+
